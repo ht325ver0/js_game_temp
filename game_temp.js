@@ -4,6 +4,7 @@ var score;
 var scene;
 var frameCount;
 var particles;
+document.addEventListener('keydown', keydown);
 
 class Sprite{
 	image = null;
@@ -27,14 +28,15 @@ class Particle extends Sprite{
 	acceleration = 0;
 	speedy = 0;
 	speedx = 0;
+	b = Math.random();
 	
 	constructor(x, y){
 		super();
 		this.posx = x;
 		this.posy = y;
-		this.baseLine = 400;
+		this.baseLine = 420;
 		this.acceleration = 0.5;
-		var angle = Math.PI * 2 * Math.random();
+		var angle = (Math.PI * 5) /4 + (Math.PI / 2) * Math.random();
 		this.speed = 5 + Math.random() * 20;
 		this.speedx = this.speed + Math.cos(angle);
 		this.speedy = this.speed + Math.sin(angle);
@@ -50,7 +52,7 @@ class Particle extends Sprite{
 	
 	draw(g){
 		g.fillStyle = "rgb(225,50,50)";
-		g.fillRect(this.posx - this.r, this.posy - this.r, this.r, this.r);
+		g.fillRect(this.posx - this.r, this.posy - this.r, this.r * 2, this.r * 2);
 	}
 }
 
@@ -95,8 +97,20 @@ function init(){
 }
 
 function keydown(e){
-	player.speed = -20;
-	player.acceleration = 1.5;
+	if (e.key === ' '){
+		player.speed = -20;
+		player.acceleration = 1.5;
+	};
+	
+	if(e.key === 'a'){
+		player.speed = 5;
+		player.posx -= player.speed;
+	};
+	
+	if(e.key === "d"){
+		player.speed = 5;
+		player.posx += player.speed;
+	}
 }
 
 function gameloop(){
@@ -130,7 +144,7 @@ function update(){
 		scene = Scenes.GameOver;
 		frameCount = 0;
 		
-		for(var i = 0; i < 300; i++){
+		for(var i = 0; i < 900; i++){
 			particles.push(new Particle(player.posx, player.posy))
 		}
 	}
