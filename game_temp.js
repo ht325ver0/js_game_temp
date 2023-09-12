@@ -26,7 +26,6 @@ class Sprite{
 class Particle extends Sprite{
 	speedy = 0;
 	speedx = 0;
-	b = Math.random();
 	
 	constructor(x, y){
 		super();
@@ -34,7 +33,7 @@ class Particle extends Sprite{
 		this.posy = y;
 		this.size = Math.random() * 5 + 1;
 		this.speed = 5 + Math.random() * 20;
-		this.angle = Math.random() * Math.PI;
+		this.angle = Math.random() * Math.PI * 2;
 		this.speedx = this.speed * Math.cos(this.angle);
 		this.speedy = this.speed * Math.sin(this.angle);
 		this.r = 2;
@@ -51,8 +50,25 @@ class Particle extends Sprite{
 	
 	
 	draw(g){
-		g.fillStyle = "rgb(225,225,0)";
+		g.fillStyle = "rgb(225,0,0)";
 		g.fillRect(this.posx - this.r, this.posy - this.r, this.size, this.size);
+	}
+}
+
+class Enemy extends Sprite{
+	constructor(posx, posy, r, imageUrl, speed, acceleration){
+		super();
+		this.posx = posx;
+		this.posy = posy;
+		this.r = r;
+		this.image = new Image();
+		this.image.src = imageUrl;
+		this.speed = speed;
+		this.acceleration = acceleration;
+	 }
+	 
+	update(){
+		this.posy -= this.speed;
 	}
 }
 
@@ -79,14 +95,9 @@ function init(){
 	player.image = new Image();
 	player.image.src = "./roket.png";
 	
-	enemy = new Sprite();
-	enemy.posx = 300;
-	enemy.posy = 400;
-	enemy.r = 16;
-	enemy.image = new Image();
-	enemy.image.src = "./star01.png";
-	enemy.speed = 5;
-	enemy.acceleration = 0;
+
+	enemy = [];
+	next = 10;
 	
 	score = 0;
 	frameCount = 0;
@@ -124,6 +135,7 @@ function gameloop(){
             particles.splice(i, 1);
             i--;
         }
+    }
 }
 
 function update(){
@@ -146,16 +158,17 @@ function update(){
 		player.speed = 0;
 	}
 		  
-	enemy.posx -= enemy.speed;
+	
+	
+	enemy.forEach((e) => {
+		e.update();
+		if(e.posy < -100){
+			score += 100;
+		}
 		
-	if (enemy.posx < -100){
-		enemy.posx = 500;
-		score += 100;
-	}	
-		
-	var diffX = player.posx - enemy.posx;
-	var diffY =  player.posy - enemy.posy 
-	var distance = Math.sqrt(diffX * diffX + diffY * diffY);
+		var diffX = player.posx - enemy.posx;
+		var diffY =  player.posy - enemy.posy;
+		var distance = Math.sqrt(diffX * diffX + diffY * diffY);
 		
 	if (distance < player.r + enemy.r){
 		
@@ -165,43 +178,66 @@ function update(){
 			
 		scene = Scenes.GameOver;
 		frameCount = 0;
-		
-		
 	}
+		
+	});
+	
+	enemy = enemy.filter((e) => e.posy >= -100);
+	
+	if(frameCount === next){
+		generateNextEnemy();
+	}
+}
+
+function generateNextEnemy(){
+	var　newEnemy = new Enemy(
+		400 - (Math.random() * 401),
+	    400,
+		16,
+		"./star01.png",
+		4 + 5 * Math.random(),
+		0
+	);
+	
+	enemy.push(newEnemy);
+	next = Math.floor(frameCount + 30 + 80 * Math.random());
 }
 
 function draw(){
 	if(scene == Scenes.GameMain){
-	g.fillStyle = "rgb(0,0,0)";
-	g.fillRect(0,0,480,480);
-	
-	player.draw(g);
-	
-	enemy.draw(g);
+		g.fillStyle = "rgb(0,0,0)";
+		g.fillRect(0,0,480,480);
 		
-	g.fillStyle = "rgb(255,255,255)";
-	g.font = "16pt Arial";
-	var scoreLabel = "SCORE : " + score;
-	var scoreLabelWidth = g.measureText(scoreLabel).width;
-	g.fillText(scoreLabel, 460 - scoreLabelWidth, 40);
+		player.draw(g);
+		
+		 enemy.forEach((e) => {
+            e.draw(g);
+        });
+		
+			
+		g.fillStyle = "rgb(255,255,255)";
+		g.font = "16pt Arial";
+		var scoreLabel = "SCORE : " + score;
+		var scoreLabelWidth = g.measureText(scoreLabel).width;
+		g.fillText(scoreLabel, 460 - scoreLabelWidth, 40);
 	}else if(scene == Scenes.GameOver){
 		
-	g.fillStyle = "rgb(255,255,255)";
-	g.font = "48pt Arial";
-	var scoreLabel = "Game Over";
-	var scoreLabelWidth = g.measureText(scoreLabel).width;
-	g.fillText(scoreLabel, 240 - scoreLabelWidth / 2, 240);
-	
+		g.fillStyle = "rgb(255,255,255)";
+		g.font = "48pt Arial";
+		var scoreLabel = "Game Over";
+		var scoreLabelWidth = g.measureText(scoreLabel).width;
+		g.fillText(scoreLabel, 240 - scoreLabelWidth / 2, 240);
+		
 
-  for(let i = 0; i < particles.length; i++) {
-    particles[i].update();
-    particles[i].draw(g);
-
-    if(particles[i].size <= 0.2) {
-      particles.splice(i, 1);
-      i--;
-    }
-  }
+		  for(let i = 0; i < particles.length; i++) {
+			    particles[i].update();
+			    particles[i].draw(g);
+			
+			    if(particles[i].size <= 0.2) {
+				      particles.splice(i, 1);
+				      i--;
+				    }
+         }
 	
 	}
 }
