@@ -24,8 +24,6 @@ class Sprite{
 }
 
 class Particle extends Sprite{
-	baseLine = 0;
-	acceleration = 0;
 	speedy = 0;
 	speedx = 0;
 	b = Math.random();
@@ -34,25 +32,27 @@ class Particle extends Sprite{
 		super();
 		this.posx = x;
 		this.posy = y;
-		this.baseLine = 420;
-		this.acceleration = 0.5;
-		var angle = (Math.PI * 5) /4 + (Math.PI / 2) * Math.random();
+		this.size = Math.random() * 5 + 1;
 		this.speed = 5 + Math.random() * 20;
-		this.speedx = this.speed + Math.cos(angle);
-		this.speedy = this.speed + Math.sin(angle);
+		this.angle = Math.random() * Math.PI;
+		this.speedx = this.speed * Math.cos(this.angle);
+		this.speedy = this.speed * Math.sin(this.angle);
 		this.r = 2;
 	}
 	
 	update(){
-		this.speedx *= 0.97;
-		this.speedy += this.acceleration;
 		this.posx += this.speedx;
 		this.posy += this.speedy;
+		
+		if (this.size > 0.2){
+			this.size -= 0.1;
+			}
 	}
 	
+	
 	draw(g){
-		g.fillStyle = "rgb(225,50,50)";
-		g.fillRect(this.posx - this.r, this.posy - this.r, this.r * 2, this.r * 2);
+		g.fillStyle = "rgb(225,225,0)";
+		g.fillRect(this.posx - this.r, this.posy - this.r, this.size, this.size);
 	}
 }
 
@@ -65,8 +65,7 @@ onload = function(){
 	canvas = document.getElementById("gamecanvas");
 	g = canvas.getContext("2d");
 	init();
-	document.onkeydown = keydown;
-	setInterval("gameloop()",16);
+	setInterval(gameloop,16);
 };
 
 function init(){
@@ -116,6 +115,15 @@ function keydown(e){
 function gameloop(){
 	update();
 	draw();
+	
+	for(let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw(g);
+
+        if(particles[i].size <= 0) {
+            particles.splice(i, 1);
+            i--;
+        }
 }
 
 function update(){
@@ -126,6 +134,16 @@ function update(){
 		player.posy = 400;
 		player.speed = 0;
 		player.acceleration = 0;
+	}
+	
+	if(player.posx < 10){
+		player.posx = 10;
+		player.speed = 0;
+	}
+	
+	if(player.posx  > 460){
+		player.posx = 460;
+		player.speed = 0;
 	}
 		  
 	enemy.posx -= enemy.speed;
@@ -140,13 +158,15 @@ function update(){
 	var distance = Math.sqrt(diffX * diffX + diffY * diffY);
 		
 	if (distance < player.r + enemy.r){
+		
+		for(var i = 0; i < 300; i++){
+			particles.push(new Particle(player.posx, player.posy))
+		}
 			
 		scene = Scenes.GameOver;
 		frameCount = 0;
 		
-		for(var i = 0; i < 900; i++){
-			particles.push(new Particle(player.posx, player.posy))
-		}
+		
 	}
 }
 
@@ -172,9 +192,16 @@ function draw(){
 	var scoreLabelWidth = g.measureText(scoreLabel).width;
 	g.fillText(scoreLabel, 240 - scoreLabelWidth / 2, 240);
 	
-	particles.forEach((p) => {
-		p.draw(g);
-	});
+
+  for(let i = 0; i < particles.length; i++) {
+    particles[i].update();
+    particles[i].draw(g);
+
+    if(particles[i].size <= 0.2) {
+      particles.splice(i, 1);
+      i--;
+    }
+  }
 	
 	}
 }
