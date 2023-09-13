@@ -68,7 +68,7 @@ class Enemy extends Sprite{
 	 }
 	 
 	update(){
-		this.posy -= this.speed;
+		this.posy += this.speed;
 	}
 }
 
@@ -158,19 +158,21 @@ function update(){
 		player.speed = 0;
 	}
 		  
+	if(frameCount === next){
+			generateNextEnemy();
+	}
 	
-	
-	enemy.forEach((e) => {
+	newEnemy.forEach((e) => {
 		e.update();
-		if(e.posy < -100){
+		if(e.posy > 400){
 			score += 100;
 		}
+			
+	var diffX = player.posx - newEnemy.posx;
+	var diffY =  player.posy - newEnemy.posy;
+	var distance = Math.sqrt(diffX * diffX + diffY * diffY);
 		
-		var diffX = player.posx - enemy.posx;
-		var diffY =  player.posy - enemy.posy;
-		var distance = Math.sqrt(diffX * diffX + diffY * diffY);
-		
-	if (distance < player.r + enemy.r){
+	if (distance < player.r + newEnemy.r){
 		
 		for(var i = 0; i < 300; i++){
 			particles.push(new Particle(player.posx, player.posy))
@@ -178,21 +180,19 @@ function update(){
 			
 		scene = Scenes.GameOver;
 		frameCount = 0;
-	}
+	
+		enemy = enemy.filter((e) => e.posy >= -100);
+	
 		
-	});
-	
-	enemy = enemy.filter((e) => e.posy >= -100);
-	
-	if(frameCount === next){
-		generateNextEnemy();
+		}
 	}
 }
+
 
 function generateNextEnemy(){
 	var　newEnemy = new Enemy(
 		400 - (Math.random() * 401),
-	    400,
+	    0,
 		16,
 		"./star01.png",
 		4 + 5 * Math.random(),
