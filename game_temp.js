@@ -4,6 +4,7 @@ var score;
 var scene;
 var frameCount;
 var particles;
+var newEnemy;
 document.addEventListener('keydown', keydown);
 
 class Sprite{
@@ -40,6 +41,7 @@ class Particle extends Sprite{
 	}
 	
 	update(){
+		
 		this.posx += this.speedx;
 		this.posy += this.speedy;
 		
@@ -162,17 +164,17 @@ function update(){
 			generateNextEnemy();
 	}
 	
-	newEnemy.forEach((e) => {
+	enemy.forEach((e) => {
 		e.update();
 		if(e.posy > 400){
 			score += 100;
 		}
 			
-	var diffX = player.posx - newEnemy.posx;
-	var diffY =  player.posy - newEnemy.posy;
+	var diffX = player.posx - e.posx;
+	var diffY =  player.posy - e.posy;
 	var distance = Math.sqrt(diffX * diffX + diffY * diffY);
 		
-	if (distance < player.r + newEnemy.r){
+	if (distance < player.r + e.r){
 		
 		for(var i = 0; i < 300; i++){
 			particles.push(new Particle(player.posx, player.posy))
@@ -185,12 +187,13 @@ function update(){
 	
 		
 		}
-	}
+});
 }
 
 
+
 function generateNextEnemy(){
-	var　newEnemy = new Enemy(
+      　newEnemy = new Enemy(
 		400 - (Math.random() * 401),
 	    0,
 		16,
