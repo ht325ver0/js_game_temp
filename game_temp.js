@@ -5,6 +5,7 @@ var scene;
 var frameCount;
 var particles;
 var newEnemy;
+var amo;
 document.addEventListener('keydown', keydown);
 
 class Sprite{
@@ -52,7 +53,7 @@ class Particle extends Sprite{
 	
 	
 	draw(g){
-		g.fillStyle = "rgb(225,0,0)";
+		g.fillStyle = "rgb(225,100,0)";
 		g.fillRect(this.posx - this.r, this.posy - this.r, this.size, this.size);
 	}
 }
@@ -74,6 +75,25 @@ class Enemy extends Sprite{
 	}
 }
 
+class Amo extends Sprite{
+	constructor(x,y){
+		super();
+		this.posx = x;
+		this.posy = y;
+		this.r = 5;
+		this.image = new Image();
+		this.image.src = "amo.png";
+		this.speed = 20;
+	}
+	
+	update(){
+		this.posy -= this.speed;
+		
+	}
+	
+	
+}
+
 const Scenes = {
 	GameMain: "GameMain",
 	GameOver: "GameOver",
@@ -90,7 +110,7 @@ function init(){
 	
 	player = new Sprite();
 	player.posx = 250;
-	player.posy = 200;
+	player.posy = 450;
 	player.r = 16;
 	player.speed = 0;
 	player.acceleration =0;
@@ -106,21 +126,22 @@ function init(){
 	scene = Scenes.GameMain;
 	
 	particles = [];
+	
+	amo = [];
 }
 
 function keydown(e){
 	if (e.key === ' '){
-		player.speed = -20;
-		player.acceleration = 1.5;
+		firing(player.posx ,player.posy);
 	};
 	
 	if(e.key === 'a'){
-		player.speed = 5;
+		player.speed = 10;
 		player.posx -= player.speed;
 	};
 	
 	if(e.key === "d"){
-		player.speed = 5;
+		player.speed = 10;
 		player.posx += player.speed;
 	}
 }
@@ -142,6 +163,7 @@ function gameloop(){
 
 function update(){
 	frameCount++;
+	score++
 	player.speed = player.speed + player.acceleration;
 	player.posy = player.posy + player.speed;
 	if(player.posy > 400){
@@ -164,33 +186,47 @@ function update(){
 			generateNextEnemy();
 	}
 	
-	enemy.forEach((e) => {
+	amo.forEach((e) => {
+		
 		e.update();
-		if(e.posy > 400){
-			score += 100;
-		}
+		
+	})
+	
+	enemy.forEach((e) => {
+		
+		e.update();
 			
 	var diffX = player.posx - e.posx;
 	var diffY =  player.posy - e.posy;
 	var distance = Math.sqrt(diffX * diffX + diffY * diffY);
+	
+	enemy = enemy.filter((e) => e.posy >= -100);
 		
 	if (distance < player.r + e.r){
 		
-		for(var i = 0; i < 300; i++){
+		for(var i = 0; i < 100; i++){
 			particles.push(new Particle(player.posx, player.posy))
 		}
 			
 		scene = Scenes.GameOver;
 		frameCount = 0;
-	
-		enemy = enemy.filter((e) => e.posy >= -100);
-	
 		
 		}
-});
+	});
+	
+	 amo = amo.filter((a) => {
+        a.update();
+        return a.posy > 0;
+    });
+    
 }
 
-
+function firing(x,y){
+	
+	var newamo = new Amo(x,y);
+	amo.push(newamo);
+	 
+}
 
 function generateNextEnemy(){
       　newEnemy = new Enemy(
@@ -213,9 +249,13 @@ function draw(){
 		
 		player.draw(g);
 		
-		 enemy.forEach((e) => {
+		enemy.forEach((e) => {
             e.draw(g);
         });
+        
+        amo.forEach((e) => {
+			e.draw(g)
+		});
 		
 			
 		g.fillStyle = "rgb(255,255,255)";
