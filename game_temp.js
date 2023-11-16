@@ -132,10 +132,12 @@ function init(){
 
 function keydown(e){
 	if (e.key === ' '){
+		
 		firing(player.posx ,player.posy);
 	};
 	
 	if(e.key === 'a'){
+
 		player.speed = 10;
 		player.posx -= player.speed;
 	};
